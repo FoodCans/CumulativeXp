@@ -1,0 +1,8 @@
+name: CumulativeXp
+author: FoodCans
+version: ${project.version}
+api-version: 1.17
+main: dev.foodcans.cumulativexp.CumulativeXp
+softdepend: [PlaceholderAPI]
+commands:
+  cxp: {}

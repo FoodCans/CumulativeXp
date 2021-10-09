@@ -1,0 +1,12 @@
+# MySQL connection
+mysql:
+  url: "localhost:3306/mc"
+  username: "username"
+  password: "password"
+  table_name: "cumulativexp"
+
+# If the server is in hardcore mode and a player dies, should their data be wiped
+remove_player_if_hardcore: true
+
+# The number of entries to display per page when using /cxp top
+entries_per_page: 10
