@@ -17,7 +17,7 @@ import java.util.Objects;
 
 /**
  * Spigot plugin that keeps track of the total amount of experience points players have earned
- * @Author FoodCans
+ * @author FoodCans
  */
 public class CumulativeXp extends JavaPlugin
 {
@@ -50,7 +50,8 @@ public class CumulativeXp extends JavaPlugin
         PlayerManager playerManager = new PlayerManager(databaseManager);
 
         // PlaceholderAPI registration
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+        {
             new XpPlaceholder(playerManager).register();
             new RankPlaceholder(playerManager).register();
         }
