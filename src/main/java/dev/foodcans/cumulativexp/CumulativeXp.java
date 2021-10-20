@@ -5,8 +5,7 @@ import dev.foodcans.cumulativexp.database.DatabaseManager;
 import dev.foodcans.cumulativexp.lang.LangFile;
 import dev.foodcans.cumulativexp.listener.PlayerListener;
 import dev.foodcans.cumulativexp.manager.PlayerManager;
-import dev.foodcans.cumulativexp.placeholderapi.RankPlaceholder;
-import dev.foodcans.cumulativexp.placeholderapi.XpPlaceholder;
+import dev.foodcans.cumulativexp.placeholderapi.CxpPlaceholder;
 import dev.foodcans.cumulativexp.util.Config;
 import dev.foodcans.cumulativexp.util.LogUtil;
 import org.bukkit.Bukkit;
@@ -52,8 +51,7 @@ public class CumulativeXp extends JavaPlugin
         // PlaceholderAPI registration
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
         {
-            new XpPlaceholder(playerManager).register();
-            new RankPlaceholder(playerManager).register();
+            new CxpPlaceholder(playerManager).register();
         }
 
         getServer().getPluginManager().registerEvents(new PlayerListener(playerManager), this);
