@@ -1,7 +1,10 @@
 package dev.foodcans.cumulativexp.manager;
 
+import dev.foodcans.cumulativexp.CumulativeXp;
 import dev.foodcans.cumulativexp.database.DatabaseManager;
 import dev.foodcans.cumulativexp.util.TaskUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -11,6 +14,8 @@ public class PlayerManager
     private List<UUID> ranks;
 
     private final DatabaseManager databaseManager;
+
+    private BukkitTask task;
 
     public PlayerManager(DatabaseManager databaseManager)
     {
@@ -22,6 +27,8 @@ public class PlayerManager
 
     private void loadData()
     {
+        xpMap.clear();
+        ranks.clear();
         Set<String> uuids = databaseManager.getUuids();
         for (String uuid : uuids)
         {
@@ -30,6 +37,40 @@ public class PlayerManager
             ranks.add(UUID.fromString(uuid));
         }
         sortRanks();
+
+    }
+
+    public void startTask()
+    {
+        this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(CumulativeXp.getInstance(), () ->
+        {
+            Map<UUID, Integer> xpMap = new HashMap<>();
+            List<UUID> ranks = new ArrayList<>();
+            Set<String> uuids = databaseManager.getUuids();
+            for (String uuid : uuids)
+            {
+                int xp = databaseManager.getTotalXp(uuid);
+                xpMap.put(UUID.fromString(uuid), xp);
+                ranks.add(UUID.fromString(uuid));
+            }
+            Bukkit.getScheduler().runTask(CumulativeXp.getInstance(), () ->
+            {
+               this.xpMap.clear();
+               this.ranks.clear();
+               this.xpMap.putAll(xpMap);
+               this.ranks.addAll(ranks);
+               sortRanks();
+            });
+        }, 20L, 20L);
+    }
+
+    public void stopTask()
+    {
+        if (task != null)
+        {
+            task.cancel();
+            task = null;
+        }
     }
 
     public void addXp(UUID uuid, int amount)

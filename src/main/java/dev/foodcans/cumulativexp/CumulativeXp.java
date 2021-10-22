@@ -24,6 +24,7 @@ public class CumulativeXp extends JavaPlugin
 
     private LangFile langFile;
     private DatabaseManager databaseManager;
+    private PlayerManager playerManager;
 
     @Override
     public void onLoad()
@@ -46,7 +47,8 @@ public class CumulativeXp extends JavaPlugin
             LogUtil.error(e.getMessage());
         }
 
-        PlayerManager playerManager = new PlayerManager(databaseManager);
+        this.playerManager = new PlayerManager(databaseManager);
+        this.playerManager.startTask();
 
         // PlaceholderAPI registration
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
@@ -65,6 +67,7 @@ public class CumulativeXp extends JavaPlugin
     public void onDisable()
     {
         databaseManager.shutdown();
+        playerManager.stopTask();
     }
 
     public LangFile getLangFile()
