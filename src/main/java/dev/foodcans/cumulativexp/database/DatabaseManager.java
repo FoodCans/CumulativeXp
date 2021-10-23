@@ -2,6 +2,7 @@ package dev.foodcans.cumulativexp.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import dev.foodcans.cumulativexp.manager.PlayerData;
 import dev.foodcans.cumulativexp.util.Config;
 import dev.foodcans.cumulativexp.util.LogUtil;
 
@@ -11,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class DatabaseManager
 {
@@ -26,6 +28,8 @@ public class DatabaseManager
         hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
         hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         hikariConfig.addDataSourceProperty("useServerPrepStmts", "true");
+        hikariConfig.addDataSourceProperty("allowPublicKeyRetrieval", "true");
+        hikariConfig.addDataSourceProperty("useSSL", "false");
         dataSource = new HikariDataSource(hikariConfig);
     }
 
@@ -38,47 +42,45 @@ public class DatabaseManager
         }
     }
 
-    public int getTotalXp(String uuid)
+    public PlayerData getPlayerData(String uuid)
     {
-        int xp = 0;
         try (Connection connection = getConnection())
         {
-            xp = getTotalXp(uuid, connection);
+            return getPlayerData(uuid, connection);
         } catch (SQLException e)
         {
             LogUtil.error(e.getMessage());
         }
-        return xp;
+        return null;
     }
 
-    private int getTotalXp(String uuid, Connection connection) throws SQLException
+    private PlayerData getPlayerData(String uuid, Connection connection) throws SQLException
     {
-        int xp = 0;
-        PreparedStatement statement = connection.prepareStatement(Queries.GET_XP);
+        PreparedStatement statement = connection.prepareStatement(Queries.GET);
         statement.setString(1, uuid);
         ResultSet result = statement.executeQuery();
         if (result.next())
         {
-            xp = result.getInt("xp");
+            int xp = result.getInt("xp");
+            int level = result.getInt("level");
+            return new PlayerData(UUID.fromString(uuid), xp, level);
         }
-        return xp;
+        return null;
     }
 
-    public void addXp(String uuid, int amount)
+    public void updateXp(String uuid, int xp)
     {
         try (Connection connection = getConnection())
         {
-            addXp(uuid, amount, connection);
+            updateXp(uuid, xp, connection);
         } catch (SQLException e)
         {
             LogUtil.error(e.getMessage());
         }
     }
 
-    private void addXp(String uuid, int amount, Connection connection) throws SQLException
+    private void updateXp(String uuid, int xp, Connection connection) throws SQLException
     {
-        int xp = getTotalXp(uuid, connection);
-        xp += amount;
         PreparedStatement statement = connection.prepareStatement(Queries.UPDATE_XP);
         statement.setString(1, uuid);
         statement.setInt(2, xp);
@@ -86,17 +88,36 @@ public class DatabaseManager
         statement.executeUpdate();
     }
 
-    public Set<String> getUuids()
+    public void updateLevel(String uuid, int level)
     {
-        Set<String> uuids = new HashSet<>();
         try (Connection connection = getConnection())
         {
-            uuids = getUuids(connection);
+            updateLevel(uuid, level, connection);
         } catch (SQLException e)
         {
             LogUtil.error(e.getMessage());
         }
-        return uuids;
+    }
+
+    private void updateLevel(String uuid, int level, Connection connection) throws SQLException
+    {
+        PreparedStatement statement = connection.prepareStatement(Queries.UPDATE_LEVEL);
+        statement.setString(1, uuid);
+        statement.setInt(2, level);
+        statement.setInt(3, level);
+        statement.executeUpdate();
+    }
+
+    public Set<String> getUuids()
+    {
+        try (Connection connection = getConnection())
+        {
+            return getUuids(connection);
+        } catch (SQLException e)
+        {
+            LogUtil.error(e.getMessage());
+        }
+        return null;
     }
 
     private Set<String> getUuids(Connection connection) throws SQLException
@@ -125,6 +146,7 @@ public class DatabaseManager
     private void removeUuid(String uuid, Connection connection) throws SQLException
     {
         PreparedStatement statement = connection.prepareStatement(Queries.REMOVE_PLAYER);
+        statement.setString(1, uuid);
         statement.executeUpdate();
     }
 

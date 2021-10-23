@@ -7,12 +7,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerLevelChangeEvent;
 
 import java.util.UUID;
 
 public class PlayerListener implements Listener
 {
-    private PlayerManager playerManager;
+    private final PlayerManager playerManager;
 
     public PlayerListener(PlayerManager playerManager)
     {
@@ -29,6 +30,19 @@ public class PlayerListener implements Listener
         if (amount > 0)
         {
             playerManager.addXp(uuid, amount);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerLevelChange(PlayerLevelChangeEvent event)
+    {
+        UUID uuid = event.getPlayer().getUniqueId();
+        int change =  event.getNewLevel() - event.getOldLevel();
+
+        // If the player loses level we don't want to do anything
+        if (change > 0)
+        {
+            playerManager.addLevel(uuid, change);
         }
     }
 

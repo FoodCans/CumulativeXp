@@ -2,17 +2,15 @@ package dev.foodcans.cumulativexp.command;
 
 import dev.foodcans.cumulativexp.lang.Lang;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
-public class CommandManager implements CommandExecutor
+public class CommandManager implements TabExecutor
 {
     private Set<CXPCommand> commands;
 
@@ -39,7 +37,7 @@ public class CommandManager implements CommandExecutor
         {
             if (command.getName().equalsIgnoreCase(subCommand))
             {
-                if (!permissionCheck(sender, command.getPermission()))
+                if (!permissionCheck(sender, command.getPermission(), true))
                 {
                     return true;
                 }
@@ -60,12 +58,31 @@ public class CommandManager implements CommandExecutor
         return true;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args)
+    {
+        List<String> completions = new ArrayList<>();
+        if (args.length == 1)
+        {
+            String arg = args[0].toLowerCase();
+            for (CXPCommand command : commands)
+            {
+                if (command.getName().toLowerCase().startsWith(arg) && permissionCheck(sender, command.getPermission(), true))
+                {
+                    completions.add(command.getName());
+                }
+            }
+            return completions;
+        }
+        return null;
+    }
+
     public void registerCommand(CXPCommand... commands)
     {
         this.commands.addAll(Arrays.asList(commands));
     }
 
-    private boolean permissionCheck(CommandSender sender, String permission)
+    private boolean permissionCheck(CommandSender sender, String permission, boolean verbose)
     {
         if (sender != null)
         {
@@ -74,7 +91,10 @@ public class CommandManager implements CommandExecutor
                 return true;
             } else
             {
-                Lang.NO_PERMISSION_COMMAND.sendMessage(sender, permission);
+                if (verbose)
+                {
+                    Lang.NO_PERMISSION_COMMAND.sendMessage(sender, permission);
+                }
                 return false;
             }
         }

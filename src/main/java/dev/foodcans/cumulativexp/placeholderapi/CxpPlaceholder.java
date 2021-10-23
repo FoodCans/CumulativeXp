@@ -23,44 +23,97 @@ public class CxpPlaceholder extends PlaceholderExpansion
     {
         if (params.startsWith("rank_"))
         {
-            String playerName = params.replace("rank_", "");
-            UUID uuid = UUIDFetcher.getUUID(playerName);
-            int rank = playerManager.getRank(uuid);
-            return rank == -1 ? "Unranked" : String.valueOf(rank);
+            return handleRank(params);
         } else if (params.startsWith("xp_"))
         {
-            String playerName = params.replace("xp_", "");
-            UUID uuid = UUIDFetcher.getUUID(playerName);
-            return String.valueOf(playerManager.getXp(uuid));
+            return handleXp(params);
+        } else if (params.startsWith("level_"))
+        {
+            return handleLevel(params);
         } else if (params.startsWith("ranktop_"))
         {
-            String posStr = params.replace("ranktop_", "");
-            if (isInt(posStr))
-            {
-                int pos = Integer.parseInt(posStr);
-                try
-                {
-                    UUID uuid = playerManager.getUuidByIndex(pos - 1);
-                    return NameFetcher.getName(uuid);
-                } catch (IndexOutOfBoundsException e)
-                {
-                    return "No player at this rank";
-                }
-            }
+            return handleRankTop(params);
         } else if (params.startsWith("xptop_"))
         {
-            String posStr = params.replace("xptop_", "");
-            if (isInt(posStr))
+            return handleXpTop(params);
+        } else if (params.startsWith("leveltop_"))
+        {
+            return handleLevelTop(params);
+        }
+        return null;
+    }
+
+    private String handleRank(String params)
+    {
+        String playerName = params.replace("rank_", "");
+        UUID uuid = UUIDFetcher.getUUID(playerName);
+        int rank = playerManager.getRank(uuid);
+        return rank == -1 ? "Unranked" : String.valueOf(rank);
+    }
+
+    private String handleXp(String params)
+    {
+        String playerName = params.replace("xp_", "");
+        UUID uuid = UUIDFetcher.getUUID(playerName);
+        return String.valueOf(playerManager.getXp(uuid));
+    }
+
+    private String handleLevel(String params)
+    {
+        String playerName = params.replace("level_", "");
+        UUID uuid = UUIDFetcher.getUUID(playerName);
+        return String.valueOf(playerManager.getLevel(uuid));
+    }
+
+    private String handleRankTop(String params)
+    {
+        String posStr = params.replace("ranktop_", "");
+        if (isInt(posStr))
+        {
+            int pos = Integer.parseInt(posStr);
+            try
             {
-                int pos = Integer.parseInt(posStr);
-                try
-                {
-                    UUID uuid = playerManager.getUuidByIndex(pos - 1);
-                    return String.valueOf(playerManager.getXp(uuid));
-                } catch (IndexOutOfBoundsException e)
-                {
-                    return "No player at this rank";
-                }
+                UUID uuid = playerManager.getUuidByIndex(pos - 1);
+                return NameFetcher.getName(uuid);
+            } catch (IndexOutOfBoundsException e)
+            {
+                return "No player at this rank";
+            }
+        }
+        return null;
+    }
+
+    private String handleXpTop(String params)
+    {
+        String posStr = params.replace("xptop_", "");
+        if (isInt(posStr))
+        {
+            int pos = Integer.parseInt(posStr);
+            try
+            {
+                UUID uuid = playerManager.getUuidByIndex(pos - 1);
+                return String.valueOf(playerManager.getXp(uuid));
+            } catch (IndexOutOfBoundsException e)
+            {
+                return "No player at this rank";
+            }
+        }
+        return null;
+    }
+
+    private String handleLevelTop(String params)
+    {
+        String posStr = params.replace("leveltop_", "");
+        if (isInt(posStr))
+        {
+            int pos = Integer.parseInt(posStr);
+            try
+            {
+                UUID uuid = playerManager.getUuidByIndex(pos - 1);
+                return String.valueOf(playerManager.getLevel(uuid));
+            } catch (IndexOutOfBoundsException e)
+            {
+                return "No player at this rank";
             }
         }
         return null;

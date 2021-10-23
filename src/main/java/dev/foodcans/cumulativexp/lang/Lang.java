@@ -12,6 +12,7 @@ public enum Lang
 
     RANK("Rank", "&8[&9CXP&8] &f{0} &7is rank &f{1}!"),
     EARNED_XP("Earned-Xp", "&8[&9CXP&8] &f{0} &7has earned a total of &f{1} &7xp!"),
+    EARNED_LEVEL("Earned-Level", "&8[&9CXP&8] &f{0} &7has earned a total of &f{1} &7levels!"),
     CONFIG_RELOADED("Config-Reloaded", "&8[&9CXP&8] &7Config reloaded!"),
     HELP("Help", "&8[&9CXP&8] &7Available commands: &f/cxp {0}"),
 

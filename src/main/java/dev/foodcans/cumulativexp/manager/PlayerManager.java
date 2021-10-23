@@ -10,8 +10,8 @@ import java.util.*;
 
 public class PlayerManager
 {
-    private volatile Map<UUID, Integer> xpMap;
-    private List<UUID> ranks;
+    private final Map<UUID, PlayerData> dataMap;
+    private final List<UUID> ranks;
 
     private final DatabaseManager databaseManager;
 
@@ -19,7 +19,7 @@ public class PlayerManager
 
     public PlayerManager(DatabaseManager databaseManager)
     {
-        this.xpMap = new HashMap<>();
+        this.dataMap = new HashMap<>();
         this.ranks = new ArrayList<>();
         this.databaseManager = databaseManager;
         loadData();
@@ -27,14 +27,14 @@ public class PlayerManager
 
     private void loadData()
     {
-        xpMap.clear();
+        dataMap.clear();
         ranks.clear();
         Set<String> uuids = databaseManager.getUuids();
         for (String uuid : uuids)
         {
-            int xp = databaseManager.getTotalXp(uuid);
-            xpMap.put(UUID.fromString(uuid), xp);
-            ranks.add(UUID.fromString(uuid));
+            PlayerData playerData = databaseManager.getPlayerData(uuid);
+            dataMap.put(playerData.getUuid(), playerData);
+            ranks.add(playerData.getUuid());
         }
         sortRanks();
 
@@ -44,20 +44,20 @@ public class PlayerManager
     {
         this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(CumulativeXp.getInstance(), () ->
         {
-            Map<UUID, Integer> xpMap = new HashMap<>();
+            Map<UUID, PlayerData> dataMap = new HashMap<>();
             List<UUID> ranks = new ArrayList<>();
             Set<String> uuids = databaseManager.getUuids();
             for (String uuid : uuids)
             {
-                int xp = databaseManager.getTotalXp(uuid);
-                xpMap.put(UUID.fromString(uuid), xp);
-                ranks.add(UUID.fromString(uuid));
+                PlayerData playerData = databaseManager.getPlayerData(uuid);
+                dataMap.put(playerData.getUuid(), playerData);
+                ranks.add(playerData.getUuid());
             }
             Bukkit.getScheduler().runTask(CumulativeXp.getInstance(), () ->
             {
-               this.xpMap.clear();
+               this.dataMap.clear();
                this.ranks.clear();
-               this.xpMap.putAll(xpMap);
+               this.dataMap.putAll(dataMap);
                this.ranks.addAll(ranks);
                sortRanks();
             });
@@ -73,30 +73,45 @@ public class PlayerManager
         }
     }
 
+    public boolean containsPlayer(UUID uuid)
+    {
+        return dataMap.containsKey(uuid);
+    }
+
     public void addXp(UUID uuid, int amount)
     {
-        int xp = xpMap.getOrDefault(uuid, 0);
-        xpMap.put(uuid, xp + amount);
-        if (!ranks.contains(uuid))
-        {
-            ranks.add(uuid);
-        }
-
+        PlayerData playerData = dataMap.getOrDefault(uuid, new PlayerData(uuid, 0, 0));
+        playerData.setXp(playerData.getXp() + amount);
+        dataMap.put(uuid, playerData);
         sortRanks();
-        TaskUtil.runAsync(() -> databaseManager.addXp(uuid.toString(), amount));
+        TaskUtil.runAsync(() -> databaseManager.updateXp(uuid.toString(), playerData.getXp()));
+    }
+
+    public void addLevel(UUID uuid, int amount)
+    {
+        PlayerData playerData = dataMap.getOrDefault(uuid, new PlayerData(uuid, 0, 0));
+        playerData.setLevel(playerData.getLevel() + amount);
+        dataMap.put(uuid, playerData);
+        sortRanks();
+        TaskUtil.runAsync(() -> databaseManager.updateLevel(uuid.toString(), playerData.getLevel()));
     }
 
     public int getXp(UUID uuid)
     {
-        return xpMap.getOrDefault(uuid, 0);
+        return containsPlayer(uuid) ? dataMap.get(uuid).getXp() : 0;
+    }
+
+    public int getLevel(UUID uuid)
+    {
+        return containsPlayer(uuid) ? dataMap.get(uuid).getLevel() : 0;
     }
 
     public void sortRanks()
     {
         ranks.sort((uuid1, uuid2) ->
         {
-            int xp1 = xpMap.getOrDefault(uuid1, 0);
-            int xp2 = xpMap.getOrDefault(uuid2, 0);
+            int xp1 = dataMap.get(uuid1).getXp();
+            int xp2 = dataMap.get(uuid2).getXp();
 
             return Integer.compare(xp2, xp1);
         });
@@ -120,7 +135,7 @@ public class PlayerManager
     public void removePlayer(UUID uuid)
     {
         ranks.remove(uuid);
-        xpMap.remove(uuid);
+        dataMap.remove(uuid);
         TaskUtil.runAsync(() -> databaseManager.removeUuid(uuid.toString()));
     }
 }

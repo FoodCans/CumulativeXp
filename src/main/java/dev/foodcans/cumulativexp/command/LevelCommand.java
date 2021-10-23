@@ -9,11 +9,11 @@ import org.bukkit.command.CommandSender;
 import java.util.Collections;
 import java.util.UUID;
 
-public class RankCommand extends CXPCommand
+public class LevelCommand extends CXPCommand
 {
-    public RankCommand(PlayerManager playerManager)
+    public LevelCommand(PlayerManager playerManager)
     {
-        super("rank", "cxp.command.rank", Collections.singletonList("<player>"), playerManager);
+        super("level", "cxp.command.level", Collections.singletonList("<player>"), playerManager);
     }
 
     @Override
@@ -24,9 +24,8 @@ public class RankCommand extends CXPCommand
         {
             UUID uuid = UUIDFetcher.getUUID(name);
 
-            int rank = playerManager.getRank(uuid);
-            String rankStr = rank == -1 ? "Unranked" : String.valueOf(rank);
-            Lang.RANK.sendMessage(sender, name, rankStr);
+            int level = playerManager.getLevel(uuid);
+            Lang.EARNED_LEVEL.sendMessage(sender, name, String.valueOf(level));
         });
     }
 

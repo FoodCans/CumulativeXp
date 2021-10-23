@@ -12,10 +12,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
-import java.util.Objects;
 
 /**
- * Spigot plugin that keeps track of the total amount of experience points players have earned
+ * Spigot plugin that keeps track of the total amount of experience points and levels players have earned
  * @author FoodCans
  */
 public class CumulativeXp extends JavaPlugin
@@ -59,8 +58,8 @@ public class CumulativeXp extends JavaPlugin
         getServer().getPluginManager().registerEvents(new PlayerListener(playerManager), this);
 
         CommandManager commandManager = new CommandManager();
-        commandManager.registerCommand(new XPCommand(playerManager), new RankCommand(playerManager), new TopCommand(playerManager), new ReloadCommand(playerManager), new HelpCommand(playerManager));
-        Objects.requireNonNull(getCommand("cxp")).setExecutor(commandManager);
+        commandManager.registerCommand(new XPCommand(playerManager), new LevelCommand(playerManager), new RankCommand(playerManager), new TopCommand(playerManager), new ReloadCommand(playerManager), new HelpCommand(playerManager));
+        getCommand("cxp").setExecutor(commandManager);
     }
 
     @Override
