@@ -50,15 +50,20 @@ public class PlayerManager
             for (String uuid : uuids)
             {
                 PlayerData playerData = databaseManager.getPlayerData(uuid);
-                dataMap.put(playerData.getUuid(), playerData);
-                ranks.add(playerData.getUuid());
+                if (playerData != null)
+                {
+                    dataMap.put(playerData.getUuid(), playerData);
+                    ranks.add(playerData.getUuid());
+                }
             }
             Bukkit.getScheduler().runTask(CumulativeXp.getInstance(), () ->
             {
-               this.dataMap.clear();
-               this.ranks.clear();
-               this.dataMap.putAll(dataMap);
-               this.ranks.addAll(ranks);
+                dataMap.keySet().removeIf(uuid -> !this.dataMap.containsKey(uuid));
+                ranks.removeIf(uuid -> !this.ranks.contains(uuid));
+                this.dataMap.clear();
+                this.ranks.clear();
+                this.dataMap.putAll(dataMap);
+                this.ranks.addAll(ranks);
                sortRanks();
             });
         }, 20L, 20L);

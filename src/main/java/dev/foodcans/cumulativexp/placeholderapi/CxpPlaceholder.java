@@ -5,6 +5,7 @@ import dev.foodcans.cumulativexp.util.NameFetcher;
 import dev.foodcans.cumulativexp.util.UUIDFetcher;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -19,8 +20,21 @@ public class CxpPlaceholder extends PlaceholderExpansion
     }
 
     @Override
-    public String onRequest(OfflinePlayer player, @NotNull String params)
+    public String onRequest(OfflinePlayer offlinePlayer, @NotNull String params)
     {
+        if (offlinePlayer != null && offlinePlayer.isOnline() && offlinePlayer.getPlayer() != null)
+        {
+            Player player = offlinePlayer.getPlayer();
+            switch (params)
+            {
+                case "rank":
+                    return handleRank(player);
+                case "xp":
+                    return handleXp(player);
+                case "level":
+                    return handleLevel(player);
+            }
+        }
         if (params.startsWith("rank_"))
         {
             return handleRank(params);
@@ -43,24 +57,52 @@ public class CxpPlaceholder extends PlaceholderExpansion
         return null;
     }
 
+    private String handleRank(Player player)
+    {
+        int rank = playerManager.getRank(player.getUniqueId());
+        return rank == -1 ? "Unranked" : String.valueOf(rank);
+    }
+
     private String handleRank(String params)
     {
         String playerName = params.replace("rank_", "");
+        if (playerName.length() == 0)
+        {
+            return null;
+        }
         UUID uuid = UUIDFetcher.getUUID(playerName);
         int rank = playerManager.getRank(uuid);
         return rank == -1 ? "Unranked" : String.valueOf(rank);
     }
 
+    private String handleXp(Player player)
+    {
+        return String.valueOf(playerManager.getXp(player.getUniqueId()));
+    }
+
     private String handleXp(String params)
     {
         String playerName = params.replace("xp_", "");
+        if (playerName.length() == 0)
+        {
+            return null;
+        }
         UUID uuid = UUIDFetcher.getUUID(playerName);
         return String.valueOf(playerManager.getXp(uuid));
+    }
+
+    private String handleLevel(Player player)
+    {
+        return String.valueOf(playerManager.getLevel(player.getUniqueId()));
     }
 
     private String handleLevel(String params)
     {
         String playerName = params.replace("level_", "");
+        if (playerName.length() == 0)
+        {
+            return null;
+        }
         UUID uuid = UUIDFetcher.getUUID(playerName);
         return String.valueOf(playerManager.getLevel(uuid));
     }
