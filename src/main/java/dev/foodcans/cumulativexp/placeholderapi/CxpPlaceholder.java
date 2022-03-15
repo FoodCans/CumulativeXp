@@ -1,5 +1,6 @@
 package dev.foodcans.cumulativexp.placeholderapi;
 
+import dev.foodcans.cumulativexp.lang.Lang;
 import dev.foodcans.cumulativexp.manager.PlayerManager;
 import dev.foodcans.cumulativexp.util.NameFetcher;
 import dev.foodcans.cumulativexp.util.UUIDFetcher;
@@ -33,6 +34,9 @@ public class CxpPlaceholder extends PlaceholderExpansion
                     return handleXp(player);
                 case "level":
                     return handleLevel(player);
+                case "status":
+                    return handleStatus(player);
+                default: return null;
             }
         }
         if (params.startsWith("rank_"))
@@ -159,6 +163,11 @@ public class CxpPlaceholder extends PlaceholderExpansion
             }
         }
         return null;
+    }
+
+    private String handleStatus(Player player)
+    {
+        return player.isDead() ? Lang.DEAD_STATUS.getMessage() : Lang.ALIVE_STATUS.getMessage();
     }
 
     @Override

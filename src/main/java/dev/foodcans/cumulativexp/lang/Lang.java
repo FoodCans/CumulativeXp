@@ -16,6 +16,9 @@ public enum Lang
     CONFIG_RELOADED("Config-Reloaded", "&8[&9CXP&8] &7Config reloaded!"),
     HELP("Help", "&8[&9CXP&8] &7Available commands: &f/cxp {0}"),
 
+    ALIVE_STATUS("Alive-Status", "&aAlive"),
+    DEAD_STATUS("Dead-Status", "&cDead"),
+
     NOT_ENOUGH_ARGS("Not-Enough-Args", "&8[&cCXP&8] &7Not enough args: &f{0}"),
     TOO_MANY_ARGS("Too-Many-Args", "&8[&cCXP&8] &7Too many args: &f{0}"),
     COMMAND_ONLY_RUN_BY_PLAYERS("Command-Only-Run-By-Players", "&8[&cCXP&8] &7This command can only be run by players."),
@@ -36,12 +39,17 @@ public enum Lang
 
     public void sendMessage(CommandSender sender, String... replacements)
     {
+        sender.sendMessage(getMessage(replacements));
+    }
+
+    public String getMessage(String... replacements)
+    {
         String message = CumulativeXp.getInstance().getLangFile().getValue(path, def);
         for (int i = 0; i < replacements.length; i++)
         {
             message = message.replace("{" + i + "}", replacements[i]);
         }
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        return ChatColor.translateAlternateColorCodes('&', message);
     }
 
     public String getPath()
