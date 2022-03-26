@@ -5,6 +5,7 @@ import dev.foodcans.cumulativexp.manager.PlayerManager;
 import dev.foodcans.cumulativexp.util.NameFetcher;
 import dev.foodcans.cumulativexp.util.UUIDFetcher;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -34,9 +35,6 @@ public class CxpPlaceholder extends PlaceholderExpansion
                     return handleXp(player);
                 case "level":
                     return handleLevel(player);
-                case "status":
-                    return handleStatus(player);
-                default: return null;
             }
         }
         if (params.startsWith("rank_"))
@@ -57,6 +55,9 @@ public class CxpPlaceholder extends PlaceholderExpansion
         } else if (params.startsWith("leveltop_"))
         {
             return handleLevelTop(params);
+        } else if (params.startsWith("status_"))
+        {
+            return handleStatus(params);
         }
         return null;
     }
@@ -165,8 +166,18 @@ public class CxpPlaceholder extends PlaceholderExpansion
         return null;
     }
 
-    private String handleStatus(Player player)
+    private String handleStatus(String params)
     {
+        String playerName = params.replace("status_", "");
+        if (playerName.length() == 0)
+        {
+            return null;
+        }
+        Player player = Bukkit.getPlayer(playerName);
+        if (player == null)
+        {
+            return null;
+        }
         return player.isDead() ? Lang.DEAD_STATUS.getMessage() : Lang.ALIVE_STATUS.getMessage();
     }
 
